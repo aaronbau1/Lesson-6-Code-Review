@@ -119,95 +119,101 @@ def final_output(player_score, dealer_score)
 end
 
 # Best of 5 Loop
-player_score = 0
-dealer_score = 0
-
-# Single Hand Loop
 loop do
-  # Single Hand Constants
-  deck = []
-  player_hand = []
-  dealer_hand = []
-  player_total = 0
-  dealer_total = 0
+  player_score = 0
+  dealer_score = 0
 
-  # Deal Hands
-  deck = initialize_deck(deck)
-  deal_cards(deck, player_hand, dealer_hand)
-
-  # Player Turn
+  # Single Hand Loop
   loop do
-    #Formats Game UI
-    system "clear"
-    show_table(player_hand, dealer_hand, true)
-    print_game_scores(player_score, dealer_score)
+    # Single Hand Constants
+    deck = []
+    player_hand = []
+    dealer_hand = []
+    player_total = 0
+    dealer_total = 0
 
-    # Player Game Interaction
-    player_total = hand_count(player_hand)
-    dealer_total = hand_count(dealer_hand)
+    # Deal Hands
+    deck = initialize_deck(deck)
+    deal_cards(deck, player_hand, dealer_hand)
 
-    prompt "You have #{player_total}"
-    prompt "Hit or Stay? (H/S)"
-    move = gets.chomp
-    if move.downcase == 's'
-      prompt "You chose to stay"
-      break
-    elsif move.downcase == 'h'
-      hit(player_hand, deck)
-      player_total = hand_count(player_hand)
-    else
-      prompt "Invalid Move"
-    end
-
-    # Player Busts
-    show_table(player_hand, dealer_hand, true)
-    if player_total > PLAY_POINT
-      system "clear"
-      show_table(player_hand, dealer_hand, false)
-      print_outcome(:player_bust, dealer_total, player_total)
-      dealer_score += 1
-      break
-    end
-  end
-
-  # Dealer turn
-  if player_total <= PLAY_POINT
+    # Player Turn
     loop do
-
       #Formats Game UI
       system "clear"
-      dealer_total = hand_count(dealer_hand)
-      show_table(player_hand, dealer_hand, false)
+      show_table(player_hand, dealer_hand, true)
       print_game_scores(player_score, dealer_score)
 
-      # Dealer Hand Logic
-      if dealer_total < player_total
-        hit(dealer_hand, deck)
-      elsif dealer_total > PLAY_POINT
-        print_outcome(:dealer_bust, dealer_total, player_total)
-        player_score += 1
+      # Player Game Interaction
+      player_total = hand_count(player_hand)
+      dealer_total = hand_count(dealer_hand)
+
+      prompt "You have #{player_total}"
+      prompt "Hit or Stay? (H/S)"
+      move = gets.chomp
+      if move.downcase == 's'
+        prompt "You chose to stay"
         break
-      elsif dealer_total > player_total
-        print_outcome(:dealer_win, dealer_total, player_total)
+      elsif move.downcase == 'h'
+        hit(player_hand, deck)
+        player_total = hand_count(player_hand)
+      else
+        prompt "Invalid Move"
+      end
+
+      # Player Busts
+      show_table(player_hand, dealer_hand, true)
+      if player_total > PLAY_POINT
+        system "clear"
+        show_table(player_hand, dealer_hand, false)
+        print_outcome(:player_bust, dealer_total, player_total)
         dealer_score += 1
-        break
-      elsif dealer_total == player_total
-        print_outcome(:tie, dealer_total, player_total)
         break
       end
     end
-  end
 
-  #End of hand result display
-  print_game_scores(player_score, dealer_score)
-  if dealer_score == 3 || player_score == 3
-    final_output(player_score, dealer_score)
-    break
-  else
-    loop do
-      prompt "Ready for the next hand? (type r)"
-      answer = gets.chomp
-      break if answer.downcase == 'r'
+    # Dealer turn
+    if player_total <= PLAY_POINT
+      loop do
+
+        #Formats Game UI
+        system "clear"
+        dealer_total = hand_count(dealer_hand)
+        show_table(player_hand, dealer_hand, false)
+        print_game_scores(player_score, dealer_score)
+
+        # Dealer Hand Logic
+        if dealer_total < player_total
+          hit(dealer_hand, deck)
+        elsif dealer_total > PLAY_POINT
+          print_outcome(:dealer_bust, dealer_total, player_total)
+          player_score += 1
+          break
+        elsif dealer_total > player_total
+          print_outcome(:dealer_win, dealer_total, player_total)
+          dealer_score += 1
+          break
+        elsif dealer_total == player_total
+          print_outcome(:tie, dealer_total, player_total)
+          break
+        end
+      end
+    end
+
+    #End of hand result display
+    print_game_scores(player_score, dealer_score)
+    if dealer_score == 3 || player_score == 3
+      final_output(player_score, dealer_score)
+      break
+    else
+      loop do
+        prompt "Ready for the next hand? (type r)"
+        answer = gets.chomp
+        break if answer.downcase == 'r'
+      end
     end
   end
+  # Play another best of 5?
+  prompt "Would you like to play again? (y/n)"
+  answer = gets.chomp
+  break if answer.downcase != 'y'
 end
